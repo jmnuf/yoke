@@ -41,10 +41,12 @@ impl RunFailure {
 }
 
 fn usage(program: &String) {
-    println!("Usage: {} [FILE]...", program);
+    println!("Usage: {} <FileA> [FileB [FileC [...]]]", program);
+    println!("    -o <FILE>      --  Output concatenation to a file");
+    println!("    -h             --  Display this help message");
 }
 
-fn run(_program: &String, args: Vec<String>) -> Result<(), RunFailure> {
+fn run(program: &String, args: Vec<String>) -> Result<(), RunFailure> {
     if args.is_empty() {
 	let failure = RunFailure::new("At least one file must be provided!", true);
 	return Err(failure);
@@ -61,6 +63,10 @@ fn run(_program: &String, args: Vec<String>) -> Result<(), RunFailure> {
 	if arg == "-o" {
 	    expecting_output = true;
 	    continue;
+	}
+	if arg == "-h" || arg == "--help" || arg == "/?" {
+	    usage(program);
+	    return Ok(());
 	}
 	let path = PathBuf::from(arg);
 	if ! path.is_file() {
@@ -110,7 +116,7 @@ fn run(_program: &String, args: Vec<String>) -> Result<(), RunFailure> {
 
     match result {
 	Err(err) => {
-	    let failure = RunFailure::new(format!("Write failed: {}", err), false);
+	    let failure = RunFailure::new(format!("Failed to write to output: {}", err), false);
 	    return Err(failure)
 	},
 	Ok(_) => {},
